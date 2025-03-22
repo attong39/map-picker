@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chọn địa điểm đón</title>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"
+      defer
+    ></script>
+    <style>
+      #map {
+        height: 400px;
+        width: 100%;
+      }
+      body {
+        font-family: sans-serif;
+        max-width: 600px;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Chọn địa điểm đón</h2>
+    <input
+      id="autocomplete"
+      type="text"
+      placeholder="Nhập địa điểm hoặc chọn trên bản đồ"
+      style="width: 100%; padding: 8px; font-size: 16px"
+    />
+    <div id="map"></div>
+    <br />
+    <button onclick="generateLink()" style="padding: 10px 20px">Tạo link Google Maps</button>
+    <p id="output" style="margin-top: 10px; font-weight: bold"></p>
+
+    <script>
+      let map, marker, autocomplete, chosenLocation;
+
+      function initMap() {
+        const defaultLocation = { lat: 21.0285, lng: 105.8542 }; // Hà Nội
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: defaultLocation,
+          zoom: 14,
+        });
+
+        autocomplete = new google.maps.places.Autocomplete(document.getElementById("autocomplete"));
+        autocomplete.addListener("place_changed", () => {
+          const place = autocomplete.getPlace();
+          if (!place.geometry) return;
+          chosenLocation = place.geometry.location;
+          setMarker(chosenLocation);
+          map.setCenter(chosenLocation);
+        });
+
+        map.addListener("click", (e) => {
+          chosenLocation = e.latLng;
+          setMarker(chosenLocation);
+        });
+      }
+
+      function setMarker(location) {
+        if (marker) marker.setMap(null);
+        marker = new google.maps.Marker({
+          position: location,
+          map: map,
+        });
+      }
+
+      function generateLink() {
+        if (!chosenLocation) {
+          alert("Bạn chưa chọn vị trí!");
+          return;
+        }
+        const lat = chosenLocation.lat();
+        const lng = chosenLocation.lng();
+        const link = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        document.getElementById("output").innerHTML = `<a href="${link}" target="_blank">${link}</a>`;
+      }
+
+      window.initMap = initMap;
+    </script>
+  </body>
+</html>
